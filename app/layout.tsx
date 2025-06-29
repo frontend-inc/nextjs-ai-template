@@ -35,6 +35,7 @@ export default function RootLayout({
           </div>
         </main>
       </body>
+      <Script src="/frontend.js" strategy="afterInteractive" />
     </html>
   );
 }
