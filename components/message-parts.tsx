@@ -4,11 +4,27 @@ import { SimpleMarkdown } from './simple-markdown';
 import { LoadingDots } from './loading-dots';
 
 interface MessagePartsProps {
-  parts: any[];
+  parts: Array<{
+    type: string;
+    text?: string;
+    toolInvocation?: {
+      state: string;
+      toolName: string;
+      result?: {
+        message?: string;
+      };
+    };
+  }>;
 }
 
 export function MessageParts({ parts }: MessagePartsProps) {
-  const renderToolInvocation = (toolInvocation: any) => {
+  const renderToolInvocation = (toolInvocation: {
+    state: string;
+    toolName: string;
+    result?: {
+      message?: string;
+    };
+  }) => {
     if (toolInvocation.state !== 'result') {
       return (
         <div className="flex items-center gap-2 text-muted-foreground">
@@ -32,7 +48,7 @@ export function MessageParts({ parts }: MessagePartsProps) {
 
   return (
     <div className="space-y-2">
-      {parts.map((part: any, index: number) => {
+      {parts.map((part, index) => {
         if (part.type === 'text') {
           return (
             <div key={index} className="max-w-none text-foreground">

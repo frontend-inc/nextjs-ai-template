@@ -8,15 +8,14 @@ import { SimpleMarkdown } from './simple-markdown';
 
 interface MessageItemProps {
   message: Message;
-  onSendMessage?: (message: string) => void;
 }
 
-export function MessageItem({ message, onSendMessage }: MessageItemProps) {
+export function MessageItem({ message }: MessageItemProps) {
   
   const renderAssistantMessage = () => {
-    // @ts-ignore
+    // @ts-expect-error - Message type from 'ai' package doesn't include parts property
     if (message?.parts && message.parts?.length > 0) {
-      // @ts-ignore
+      // @ts-expect-error - Message type from 'ai' package doesn't include parts property
       return <MessageParts parts={message.parts} />;
     }
 

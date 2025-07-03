@@ -14,7 +14,6 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const {
-    isLoading,
     messages,
     setMessages,
     input,
@@ -23,7 +22,7 @@ export default function Chat() {
   } = useChat({
     initialMessages: [],
     api: '/api/chat',    
-    onFinish: (message) => {
+    onFinish: () => {
     }
   })
 
@@ -65,7 +64,7 @@ export default function Chat() {
           accessToken: accessToken 
         } 
       });
-    } catch (error) {
+    } catch {
       // If OpenAI API key is missing or any other error occurs
       setMessages(prev => [
         ...prev,

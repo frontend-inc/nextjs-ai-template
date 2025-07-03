@@ -4,7 +4,7 @@ import { saveUser } from "./tools/save-user"
 
 export async function POST(req: Request) {
 
-  const { messages, data } = await req.json()
+  const { messages } = await req.json()
 
   const systemPrompt = `  
     You are a helpful AI coding assistant. 
