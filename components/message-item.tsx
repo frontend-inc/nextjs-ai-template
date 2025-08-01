@@ -1,30 +1,31 @@
 'use client';
 
-import { Message } from 'ai';
+import { UIMessage } from 'ai';
 import { cn } from '@/lib/utils';
 import { AIAvatar } from './ai-avatar';
 import { MessageParts } from './message-parts';
-import { SimpleMarkdown } from './simple-markdown';
 
 interface MessageItemProps {
-  message: Message;
+  message: UIMessage;
 }
 
 export function MessageItem({ message }: MessageItemProps) {
   
-  const renderAssistantMessage = () => {
-    // @ts-expect-error - Message type from 'ai' package doesn't include parts property
+  const renderMessageContent = () => {
+    console.log(message);
     if (message?.parts && message.parts?.length > 0) {
-      // @ts-expect-error - Message type from 'ai' package doesn't include parts property
-      return <MessageParts parts={message.parts} />;
+      if (message.role === 'assistant') {
+        return <MessageParts parts={message.parts} />;
+      } else {
+        // For user messages, extract text from parts
+        const textParts = message.parts.filter((part: any) => part.type === 'text');
+        if (textParts.length > 0) {
+          return textParts.map((part: any) => part.text).join('');
+        }
+      }
     }
 
-    // If no parts, display the content as text
-    return (
-      <div className="max-w-none text-foreground">
-        <SimpleMarkdown>{message.content as string}</SimpleMarkdown>
-      </div>
-    );
+    return null;
   };
   return (
     <div className={cn(
@@ -40,10 +41,7 @@ export function MessageItem({ message }: MessageItemProps) {
         "p-3 rounded-lg max-w-[80%]",
         message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground',        
       )}>
-        {message.role === 'user' ? 
-          (message.content as string) : 
-          renderAssistantMessage()
-        }
+        {renderMessageContent()}
       </div>
     </div>
   );
