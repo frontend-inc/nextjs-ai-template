@@ -2,7 +2,7 @@
 
 import { generateId } from 'ai';
 import { useChat } from '@ai-sdk/react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import WelcomeCard from "@/components/welcome-card";
 import { Messages } from "@/components/messages";
 import { MessageInput } from "@/components/mesage-input";
@@ -12,20 +12,22 @@ export const maxDuration = 30;
 
 export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [input, setInput] = useState('');
   
   const {
-    isLoading,
     messages,
     setMessages,
-    input,
-    handleInputChange,
-    handleSubmit,
+    sendMessage,
   } = useChat({
-    initialMessages: [],
     api: '/api/chat',    
-    onFinish: (message) => {
+    messages: [],    
+    onFinish: () => {
     }
   })
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -58,37 +60,60 @@ export default function Chat() {
   const handleSubmitInput = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    if (!input.trim()) return;
+    
     try {
       const accessToken = localStorage.getItem('accessToken');
-      handleSubmit(e, { 
-        data: { 
-          accessToken: accessToken 
-        } 
-      });
-    } catch (error) {
+      sendMessage(
+        { 
+          role: "user", 
+          parts: [{ type: "text", text: input }] 
+        }, 
+        { 
+          body: { 
+            accessToken: accessToken 
+          } 
+        }
+      );
+      setInput(''); // Clear input after sending
+    } catch {
       // If OpenAI API key is missing or any other error occurs
       setMessages(prev => [
         ...prev,
         {
           id: generateId(),
           role: 'assistant',
-          content: "Sorry, I'm unable to respond right now. Please check if the OpenAI API key is configured correctly.", 
+          parts: [{ type: "text", text: "Sorry, I'm unable to respond right now. Please check if the OpenAI API key is configured correctly." }],
         },
       ]);
     }
   }
 
   const handleSendMessage = async (message: string) => {
-    // Set the input value
-    handleInputChange({ target: { value: message } } as React.ChangeEvent<HTMLInputElement>);
-    
-    // Submit the form with accessToken
-    const accessToken = localStorage.getItem('accessToken');
-    await handleSubmit(undefined, { 
-      data: { 
-        accessToken: accessToken 
-      } 
-    });
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      await sendMessage(
+        { 
+          role: "user", 
+          parts: [{ type: "text", text: message }] 
+        }, 
+        { 
+          body: { 
+            accessToken: accessToken 
+          } 
+        }
+      );
+    } catch {
+      // If OpenAI API key is missing or any other error occurs
+      setMessages(prev => [
+        ...prev,
+        {
+          id: generateId(),
+          role: 'assistant',
+          parts: [{ type: "text", text: "Sorry, I'm unable to respond right now. Please check if the OpenAI API key is configured correctly." }],
+        },
+      ]);
+    }
   }
   
   return (    

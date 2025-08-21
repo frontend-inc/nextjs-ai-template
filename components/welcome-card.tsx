@@ -36,7 +36,7 @@ export default function WelcomeCard({ setInput }: WelcomeCardProps) {
             <AIAvatar />
           </div>
           <CardTitle className="font-bold text-3xl text-center text-foreground">How can I help you today?</CardTitle>
-          <CardDescription className='text-center'>I'm your AI coding assistant. Ask me anything about programming, debugging, or software development.</CardDescription>
+          <CardDescription className='text-center'>I&apos;m your AI coding assistant. Ask me anything about programming, debugging, or software development.</CardDescription>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground/90 leading-normal">         
           {/* Suggestion buttons */}

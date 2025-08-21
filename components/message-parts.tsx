@@ -4,35 +4,61 @@ import { SimpleMarkdown } from './simple-markdown';
 import { LoadingDots } from './loading-dots';
 
 interface MessagePartsProps {
-  parts: any[];
+  parts: Array<{
+    type: string;
+    text?: string;
+    state?: string;
+    input?: unknown;
+    output?: unknown;
+  }>;
 }
 
 export function MessageParts({ parts }: MessagePartsProps) {
-  const renderToolInvocation = (toolInvocation: any) => {
-    if (toolInvocation.state !== 'result') {
+  
+  const renderToolResult = (part: {
+    type: string;
+    state?: string;
+    input?: unknown;
+    output?: unknown;
+  }) => {
+
+    const toolName = part.type.startsWith('tool-') ? part.type.substring(5) : part.type;
+    
+    if (part.state === 'input-available') {
       return (
         <div className="flex items-center gap-2 text-muted-foreground">
           <LoadingDots />
-          <span>Calling {toolInvocation.toolName}...</span>
+          <span>Calling {toolName}...</span>
         </div>
       );
     }
 
-    switch (toolInvocation.toolName) {
-      case 'save_user':
-        return (
-          <div className="max-w-none">
-            {toolInvocation.result.message || 'User information saved successfully'}
-          </div>
-        );
-      default:
-        return null;
+    if (part.state === 'output-available' && part.output) {
+      switch (toolName) {
+        case 'save_user':
+          return (
+            <div className="max-w-none">
+              {part.output.message || 'User information saved successfully'}
+            </div>
+          );
+        default:
+          return (
+            <div className="max-w-none">
+              <pre className="text-sm bg-muted p-2 rounded">
+                {JSON.stringify(part.output, null, 2)}
+              </pre>
+            </div>
+          );
+      }
     }
+
+    return null;
   };
 
   return (
     <div className="space-y-2">
-      {parts.map((part: any, index: number) => {
+      {parts.map((part, index) => {
+
         if (part.type === 'text') {
           return (
             <div key={index} className="max-w-none text-foreground">
@@ -41,10 +67,10 @@ export function MessageParts({ parts }: MessagePartsProps) {
           );
         }
         
-        if (part.type === 'tool-invocation') {
+        if (part.type.startsWith('tool-')) {
           return (
             <div key={index}>
-              {renderToolInvocation(part.toolInvocation)}
+              {renderToolResult(part)}
             </div>
           );
         }
